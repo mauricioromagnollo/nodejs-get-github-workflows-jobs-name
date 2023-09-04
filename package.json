@@ -1,0 +1,15 @@
+{
+  "name": "nodejs-get-github-workflows-jobs-name",
+  "version": "1.0.0",
+  "description": "A simple code to fetch only job names from a Github repository.",
+  "author": "Maurício Romagnollo",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "nodejs",
+    "github-api"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
