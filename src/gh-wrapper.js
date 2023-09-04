@@ -49,9 +49,6 @@ export class GHWrapper {
         const yamlData = yaml.load(text);
         const jobKeys = Object.keys(yamlData.jobs);
         jobs.push(...jobKeys)
-      } else {
-        // some error, maybe some workflows files couldn't exist ?!
-        return []
       }
     }
 
