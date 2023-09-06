@@ -12,13 +12,13 @@ async function main() {
   const githubApi = new GithubApi(GITHUB_TOKEN);
 
   const jobsNames = await githubApi.getWorkflowsJobsNameByRepository(REPOSITORY_NAME, ORG_OR_USER);
-  // console.log({ jobsNames });
+  console.log({ jobsNames });
   
-  // const repositoriesNames = await githubApi.getRepositoriesNameByQuery(QUERY, ORG_OR_USER);
-  // console.log({ repositoriesNames });
+  const repositoriesNames = await githubApi.getRepositoriesNameByQuery(QUERY, ORG_OR_USER);
+  console.log({ repositoriesNames });
   
-  // const defaultBranchName = await githubApi.getDefaultBranchName(REPOSITORY_NAME, ORG_OR_USER);
-  // console.log({ defaultBranchName });
+  const defaultBranchName = await githubApi.getDefaultBranchName(REPOSITORY_NAME, ORG_OR_USER);
+  console.log({ defaultBranchName });
 }
 
 main()
