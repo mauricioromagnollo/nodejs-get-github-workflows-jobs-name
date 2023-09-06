@@ -1,49 +1,59 @@
-# nodejs-get-github-workflows-jobs-name
+# nodejs-github-api
 
-A simple code to fetch only job names from a Github repository.
+An [Github API](https://docs.github.com/pt/rest?apiVersion=2022-11-28) integration developed with Node.js and TypeScript.
 
 > This code was a conversion from Python to JavaScript, from the original repository [https://github.com/ambrisolla/github-wrapper](https://github.com/ambrisolla/github-wrapper/tree/main).
 
-## Usage
+## **Techs**
 
-Export Github PAT:
+- [node.js](https://nodejs.org/en) - v18.17.1
+- [typescript](https://www.typescriptlang.org/docs/)
+- [jest](https://jestjs.io/pt-BR/docs/getting-started)
+- [js-yaml](https://github.com/nodeca/js-yaml)
+- [tsx](https://github.com/esbuild-kit/tsx)
+- [dotenv](https://github.com/motdotla/dotenv)
 
-```sh
-export GH_PAT='your_GitHub_PAT'
-```
+## **Usage**
 
-or set in `.env` file:
-
-```sh
-mv .env.example .env
-```
-
-`.env`
-```
-GH_PAT='your_GitHub_PAT'
-```
-
-Install dependencies:
-
-- You need Node.js 18.17.1 version.
+Install [Node.js](https://nodejs.org/en) in version **18.17.1** then install package dependencies:
 
 ```sh
 npm ci
 ```
 
-Run:
+Create your `.env` file and set the variables:
 
 ```sh
-node cli.js owner/repoName
+cp `.env.example` `.env`
 ```
+
+- `GITHUB_TOKEN` &rarr; Your Github Token;
+- `REPOSITORY_NAME` &rarr; The name of the repository you want to test; 
+- `ORG_OR_USER`&rarr; The Github Organization name or your user name;
+- `QUERY` &rarr; The query with the word you want to search for repositories that include it in the name;
+
+## **Commands/Scripts**
+
+Run [main.ts](./src/main.ts) file
 
 ```sh
-# Example:
-node cli.js mauricioromagnollo/eslint-config
+npm run dev
 ```
 
-Output:
+Run [main.ts](./src/main.ts) file in watch mode
 
-```js
-{ jobs_count: 2, jobs: [ 'publish', 'tests' ] }
+```sh
+npm run dev:watch
+```
+
+Run tests with coverage
+
+```sh
+npm run test
+```
+
+Run test in watch mode
+
+```sh
+npm run test:watch
 ```

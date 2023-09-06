@@ -11,14 +11,20 @@ async function main() {
 
   const githubApi = new GithubApi(GITHUB_TOKEN);
 
-  const jobsNames = await githubApi.getWorkflowsJobsNameByRepository(REPOSITORY_NAME, ORG_OR_USER);
-  console.log({ jobsNames });
+  // const jobsNames = await githubApi.getWorkflowsJobsNameByRepository(REPOSITORY_NAME, ORG_OR_USER);
+  // console.log({ jobsNames });
   
-  const repositoriesNames = await githubApi.getRepositoriesNameByQuery(QUERY, ORG_OR_USER);
-  console.log({ repositoriesNames });
+  const countOfJobsRunned = await githubApi.getCountOfJobsRunned(REPOSITORY_NAME, ORG_OR_USER);
+  // console.log({ countOfJobsRunned });
   
-  const defaultBranchName = await githubApi.getDefaultBranchName(REPOSITORY_NAME, ORG_OR_USER);
-  console.log({ defaultBranchName });
+  const hasGithubActions = await githubApi.hasGithubActions(REPOSITORY_NAME, ORG_OR_USER);
+  // console.log({ hasGithubActions });
+
+  // const repositoriesNames = await githubApi.getRepositoriesNameByQuery(QUERY, ORG_OR_USER);
+  // console.log({ repositoriesNames });
+  
+  // const defaultBranchName = await githubApi.getDefaultBranchName(REPOSITORY_NAME, ORG_OR_USER);
+  // console.log({ defaultBranchName });
 }
 
 main()

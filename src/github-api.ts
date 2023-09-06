@@ -46,6 +46,42 @@ export class GithubApi implements IGithubApi {
     }
   }
 
+  async hasGithubActions(repositoryName: string, orgOrUser: string): Promise<boolean> {
+    if (!this.isValidToken()) {
+      throw new InvalidTokenError();
+    }
+
+    const url = `${this.BASE_API_URL}/repos/${orgOrUser}/${repositoryName}/actions/workflows`;
+    const request = await fetch(url, { headers: this.headers });
+
+    this.requestStatusErrorValidator(request.status);
+
+    if (request.status === this.STATUS_CODE.OK) {
+      const response = await request.json();
+      return response.total_count > 0;
+    } else {
+      throw new UnexpectedGithubApiError(orgOrUser, request.status);
+    }
+  }
+
+  async getCountOfJobsRunned(repositoryName: string, orgOrUser: string): Promise<Array<string> | undefined> {
+    if (!this.isValidToken()) {
+      throw new InvalidTokenError();
+    }
+
+    const url = `${this.BASE_API_URL}/repos/${orgOrUser}/${repositoryName}/actions/runs`;
+    const request = await fetch(url, { headers: this.headers });
+
+    this.requestStatusErrorValidator(request.status);
+
+    if (request.status === this.STATUS_CODE.OK) {
+      const response = await request.json();
+      return response.total_count
+    } else {
+      throw new UnexpectedGithubApiError(orgOrUser, request.status);
+    }
+  }
+
   async getRepositoriesNameByQuery(query: string, orgOrUser: string): Promise<Array<string> | undefined> {
     if (!this.isValidToken()) {
       throw new InvalidTokenError();
@@ -66,35 +102,71 @@ export class GithubApi implements IGithubApi {
     }
   }
 
-  async getWorkflowsJobsNameByRepository(repositoryName: string, orgOrUser: string): Promise<Array<string> | undefined> {
+  async getWorkflowsJobsNameByRepository(repositoryName: string, owner: string): Promise<Array<string> | undefined> {
     if (!this.isValidToken()) {
-      throw new InvalidTokenError();
+        throw new InvalidTokenError();
     }
 
-    const workflowsUrl = `${this.BASE_API_URL}/repos/${orgOrUser}/${repositoryName}/actions/workflows`;
+    const workflowsUrl = `${this.BASE_API_URL}/repos/${owner}/${repositoryName}/actions/workflows`;
     const workflowsRequest = await fetch(workflowsUrl, { headers: this.headers });
-    
+
     this.requestStatusErrorValidator(workflowsRequest.status);
 
     const workflowsResponse = await workflowsRequest.json();
-    const defaultBranch = await this.getDefaultBranchName(repositoryName, orgOrUser);
-    const availableJobsUrl = workflowsResponse.workflows.map((workflow: { path: string }) => `${this.BASE_RAW_URL}/${orgOrUser}/${repositoryName}/${defaultBranch}/${workflow.path}`);
+
+    console.log({ workflowsResponse })
 
     const jobs: Array<string> = [];
 
-    for (const url of availableJobsUrl) {
-      const request = await fetch(url, { headers: this.headers });
+    for (const workflow of workflowsResponse.workflows) {
+        const workflowFileUrl = `${this.BASE_API_URL}/repos/${owner}/${repositoryName}/contents/${workflow.path}`;
+        const workflowFileRequest = await fetch(workflowFileUrl, { headers: this.headers });
 
-      if (request.status === this.STATUS_CODE.OK) {
-        const workflowAsText = await request.text();
-        const yamlData = yaml.load(workflowAsText) as { jobs: { [key: string]: any } };
-        const jobsName = Object.keys(yamlData.jobs);
-        jobs.push(...jobsName);
-      }
+        if (workflowFileRequest.status === this.STATUS_CODE.OK) {
+            const workflowFileData = await workflowFileRequest.json();
+            // console.log({ workflowFileData })
+            const workflowFileContent = Buffer.from(workflowFileData.content, 'base64').toString('utf-8');
+            const yamlData = yaml.load(workflowFileContent) as { jobs: { [key: string]: any } };
+            // console.log(yamlData.jobs)
+            const x = Object.entries(yamlData.jobs).map(([jobName, jobSpec]) => jobSpec.name || jobName)
+            // console.log(x)
+            // const jobsName = Object.keys(yamlData.jobs);
+            jobs.push(...x);
+        }
     }
 
     return Array.from(new Set(jobs.sort()));
   }
+
+  // async getWorkflowsJobsNameByRepository(repositoryName: string, orgOrUser: string): Promise<Array<string> | undefined> {
+  //   if (!this.isValidToken()) {
+  //     throw new InvalidTokenError();
+  //   }
+
+  //   const workflowsUrl = `${this.BASE_API_URL}/repos/${orgOrUser}/${repositoryName}/actions/workflows`;
+  //   const workflowsRequest = await fetch(workflowsUrl, { headers: this.headers });
+    
+  //   this.requestStatusErrorValidator(workflowsRequest.status);
+
+  //   const workflowsResponse = await workflowsRequest.json();
+  //   const defaultBranch = await this.getDefaultBranchName(repositoryName, orgOrUser);
+  //   const availableJobsUrl = workflowsResponse.workflows.map((workflow: { path: string }) => `${this.BASE_RAW_URL}/${orgOrUser}/${repositoryName}/${defaultBranch}/${workflow.path}`);
+
+  //   const jobs: Array<string> = [];
+
+  //   for (const url of availableJobsUrl) {
+  //     const request = await fetch(url, { headers: this.headers });
+
+  //     if (request.status === this.STATUS_CODE.OK) {
+  //       const workflowAsText = await request.text();
+  //       const yamlData = yaml.load(workflowAsText) as { jobs: { [key: string]: any } };
+  //       const jobsName = Object.keys(yamlData.jobs);
+  //       jobs.push(...jobsName);
+  //     }
+  //   }
+
+  //   return Array.from(new Set(jobs.sort()));
+  // }
 
   private isValidToken(): boolean {
     return !(!this.githubToken);
